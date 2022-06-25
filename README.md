@@ -99,3 +99,11 @@ No GraphQL temos dois tipos de operações:
 
 - query: busca dados
 - mutation: criar, alterar ou deletar dados
+
+11. Ainda no GraphCMS, vamos na opção 'Project Settings' / 'API Access', copiamos o link do 'Content API'.
+
+12. Depois disso, retornamos ao VS Code e instalamos o Apollo e GraphQL para fazer a integração dos dados com o React. Para issmo, usamos o código abaixo:
+
+```bash
+npm i @apollo/client graphql
+```
