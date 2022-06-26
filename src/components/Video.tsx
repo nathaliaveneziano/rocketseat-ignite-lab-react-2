@@ -1,3 +1,4 @@
+import { gql, useQuery } from '@apollo/client';
 import { DefaultUi, Player, Youtube } from '@vime/react';
 import {
   CaretRight,
@@ -8,14 +9,60 @@ import {
 
 import '@vime/core/themes/default.css';
 
-export function Video() {
+const GET_LESSON_BY_SLUG_QUERY = gql`
+  query GetLessonBySlug($slug: String) {
+    lesson(where: { slug: $slug }) {
+      title
+      videoId
+      description
+      teacher {
+        bio
+        avatarURL
+        name
+      }
+    }
+  }
+`;
+
+interface GetLessonBySlugResponse {
+  lesson: {
+    title: string;
+    videoId: string;
+    description: string;
+    teacher: {
+      bio: string;
+      avatarURL: string;
+      name: string;
+    };
+  };
+}
+
+interface VideoProps {
+  lessonSlug: string;
+}
+
+export function Video(props: VideoProps) {
+  const { data } = useQuery<GetLessonBySlugResponse>(GET_LESSON_BY_SLUG_QUERY, {
+    variables: {
+      slug: props.lessonSlug,
+    },
+  });
+
+  if (!data) {
+    return (
+      <div className='flex-1'>
+        <p>Carregando...</p>
+      </div>
+    );
+  }
+
   return (
     <div className='flex-1'>
       {/* Vídeo */}
       <div className='bg-black flex justify-center'>
         <div className='h-full w-full max-w-[1100px]  max-h-[60vh] aspect-video'>
           <Player>
-            <Youtube videoId='KJj70dBgRPo' />
+            <Youtube videoId={data.lesson.videoId} />
             <DefaultUi />
           </Player>
         </div>
@@ -25,28 +72,24 @@ export function Video() {
         <div className='flex items-start gap-16'>
           {/* Título, descrição e professor */}
           <div className='flex-1'>
-            <h1 className='text-2xl font-bold'>Aula 01</h1>
+            <h1 className='text-2xl font-bold'>{data.lesson.title}</h1>
             <p className='mt-4 text-gray-200 leading-relaxed'>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit
-              minima veniam facilis maiores quidem, est ducimus nulla earum
-              rerum cumque veritatis sapiente ipsum amet tempore delectus
-              debitis ad officia aut. Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Praesentium non dignissimos totam nobis.
-              Reiciendis amet numquam illo harum magnam maxime! Nemo deserunt
-              quis, cum iste atque fuga totam quas quam!
+              {data.lesson.description}
             </p>
 
             <div className='flex items-center gap-4 mt-6'>
               <img
-                src='https://github.com/nathaliaveneziano.png'
+                src={data.lesson.teacher.avatarURL}
                 alt=''
                 className='h-16 w-16 rounded-full border-2 border-blue-500'
               />
               <div className='leading-relaxed'>
                 <strong className='font-bold text-2xl block'>
-                  Nathália Veneziano
+                  {data.lesson.teacher.name}
                 </strong>
-                <span className='text-gray-200 text-sm block'>description</span>
+                <span className='text-gray-200 text-sm block'>
+                  {data.lesson.teacher.bio}
+                </span>
               </div>
             </div>
           </div>
